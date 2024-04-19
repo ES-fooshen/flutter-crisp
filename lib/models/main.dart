@@ -2,8 +2,6 @@ import 'dart:collection';
 
 import 'package:crisp/models/user.dart';
 
-import 'user.dart';
-
 /// The main model for the [CrispView]
 class CrispMain {
   CrispMain({
@@ -34,45 +32,28 @@ class CrispMain {
   /// Register a new user to start the chat
   void register({required CrispUser user}) {
     if (user.verificationCode != null)
-      appendScript("window.\$crisp.push([\"set\", \"user:email\", [\"" +
-          user.email +
-          "\", \"" +
-          user.verificationCode! +
-          "\"]])");
+      appendScript("window.\$crisp.push([\"set\", \"user:email\", [\"" + user.email + "\", \"" + user.verificationCode! + "\"]])");
     else
-      appendScript("window.\$crisp.push([\"set\", \"user:email\", [\"" +
-          user.email +
-          "\"]])");
+      appendScript("window.\$crisp.push([\"set\", \"user:email\", [\"" + user.email + "\"]])");
 
-    if (user.nickname != null)
-      appendScript("window.\$crisp.push([\"set\", \"user:nickname\", [\"" +
-          user.nickname! +
-          "\"]])");
+    if (user.nickname != null) appendScript("window.\$crisp.push([\"set\", \"user:nickname\", [\"" + user.nickname! + "\"]])");
 
-    if (user.avatar != null)
-      appendScript("window.\$crisp.push([\"set\", \"user:avatar\", [\"" +
-          user.avatar! +
-          "\"]])");
+    if (user.avatar != null) appendScript("window.\$crisp.push([\"set\", \"user:avatar\", [\"" + user.avatar! + "\"]])");
 
-    if (user.phone != null)
-      appendScript("window.\$crisp.push([\"set\", \"user:phone\", [\"" +
-          user.phone! +
-          "\"]])");
+    if (user.phone != null) appendScript("window.\$crisp.push([\"set\", \"user:phone\", [\"" + user.phone! + "\"]])");
 
     this.user = user;
   }
 
   setMessage(String text) {
-    appendScript(
-        "window.\$crisp.push([\"set\", \"message:text\", [\"$text\"]])");
+    appendScript("window.\$crisp.push([\"set\", \"message:text\", [\"$text\"]])");
   }
 
   setSegments(List<String> segments) {
     if (segments.isEmpty) return;
 
     segments.forEach(
-      (value) => appendScript(
-          'window.\$crisp.push(["set", "session:segments", [["$value"]]]);'),
+      (value) => appendScript('window.\$crisp.push(["set", "session:segments", [["$value"]]]);'),
     );
   }
 
@@ -80,8 +61,7 @@ class CrispMain {
     if (sessionData.isEmpty) return;
 
     sessionData.forEach(
-      (key, value) => appendScript(
-          'window.\$crisp.push(["set", "session:data", ["$key", "$value"]]);'),
+      (key, value) => appendScript('window.\$crisp.push(["set", "session:data", ["$key", "$value"]]);'),
     );
   }
 

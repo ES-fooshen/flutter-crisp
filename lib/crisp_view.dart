@@ -3,21 +3,17 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import 'models/main.dart';
 
 const CRISP_BASE_URL = 'https://go.crisp.chat';
-
 String _crispEmbedUrl({
   required String websiteId,
   required String locale,
   String? userToken,
 }) {
   String url = CRISP_BASE_URL + '/chat/embed/?website_id=$websiteId';
-
   url += '&locale=$locale';
   if (userToken != null) url += '&token_id=$userToken';
-
   return url;
 }
 
@@ -30,13 +26,12 @@ class CrispView extends StatefulWidget {
   final bool clearCache;
   final void Function(String url)? onLinkPressed;
 
-  ///Set to true to make the background of the WebView transparent. 
-  ///If your app has a dark theme, 
+  ///Set to true to make the background of the WebView transparent.
+  ///If your app has a dark theme,
   ///this can prevent a white flash on initialization. The default value is false.
   final bool transparentBackground;
   @override
   _CrispViewState createState() => _CrispViewState();
-
   CrispView({
     required this.crispMain,
     this.clearCache = false,
@@ -48,28 +43,19 @@ class CrispView extends StatefulWidget {
 class _CrispViewState extends State<CrispView> {
   InAppWebViewController? _webViewController;
   String? _javascriptString;
-
-  late InAppWebViewGroupOptions _options;
-
+  late InAppWebViewSettings _options;
   @override
   void initState() {
     super.initState();
-    _options = InAppWebViewGroupOptions(
-      crossPlatform: InAppWebViewOptions(
-        transparentBackground: widget.transparentBackground,
-        clearCache: widget.clearCache,
-        useShouldOverrideUrlLoading: true,
-        mediaPlaybackRequiresUserGesture: false,
-      ),
-      android: AndroidInAppWebViewOptions(
-        useHybridComposition: true,
-        cacheMode: AndroidCacheMode.LOAD_CACHE_ELSE_NETWORK,
-      ),
-      ios: IOSInAppWebViewOptions(
-        allowsInlineMediaPlayback: true,
-      ),
+    _options = InAppWebViewSettings(
+      transparentBackground: widget.transparentBackground,
+      clearCache: widget.clearCache,
+      useShouldOverrideUrlLoading: true,
+      mediaPlaybackRequiresUserGesture: false,
+      useHybridComposition: true,
+      cacheMode: CacheMode.LOAD_CACHE_ELSE_NETWORK,
+      allowsInlineMediaPlayback: true,
     );
-
     _javascriptString = """
       var a = setInterval(function(){
         if (typeof \$crisp !== 'undefined'){
@@ -78,7 +64,6 @@ class _CrispViewState extends State<CrispView> {
         }
       },500)
       """;
-
     widget.crispMain.commands.clear();
   }
 
@@ -92,13 +77,15 @@ class _CrispViewState extends State<CrispView> {
           ),
         ),
       initialUrlRequest: URLRequest(
-        url: Uri.parse(_crispEmbedUrl(
-          websiteId: widget.crispMain.websiteId,
-          locale: widget.crispMain.locale,
-          userToken: widget.crispMain.userToken,
+        url: WebUri.uri(Uri.parse(
+          _crispEmbedUrl(
+            websiteId: widget.crispMain.websiteId,
+            locale: widget.crispMain.locale,
+            userToken: widget.crispMain.userToken,
+          ),
         )),
       ),
-      initialOptions: _options,
+      initialSettings: _options,
       onWebViewCreated: (InAppWebViewController controller) {
         _webViewController = controller;
       },
@@ -108,19 +95,8 @@ class _CrispViewState extends State<CrispView> {
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         var uri = navigationAction.request.url;
         var url = uri.toString();
-
         if (uri?.host != 'go.crisp.chat') {
-          if ([
-            "http",
-            "https",
-            "tel",
-            "mailto",
-            "file",
-            "chrome",
-            "data",
-            "javascript",
-            "about"
-          ].contains(uri?.scheme)) {
+          if (["http", "https", "tel", "mailto", "file", "chrome", "data", "javascript", "about"].contains(uri?.scheme)) {
             if (await canLaunch(url)) {
               if (widget.onLinkPressed != null)
                 widget.onLinkPressed!(url);
@@ -131,7 +107,6 @@ class _CrispViewState extends State<CrispView> {
             }
           }
         }
-
         return NavigationActionPolicy.ALLOW;
       },
     );
